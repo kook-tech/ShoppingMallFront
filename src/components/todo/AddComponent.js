@@ -1,8 +1,10 @@
 import React, { useState } from "react"
-import useCustomMove from "../../hooks/useCustomMove"
+import { postAdd } from "../../api/todoApi"
+import ResultModal from "../common/ResultModal"
+import useCustomMove from './../../hooks/useCustomMove';
 const initState = {
     title: '',
-    wrtier: '',
+    writer: '',
     dueDate: '',
 
 }
@@ -11,10 +13,10 @@ const initState = {
 const AddComponent = ()=> {
 
     const [todo, setTodo] = useState({...initState })
-    const [result, setResult] = useState(null) //결과 상태 
 
-  const {moveToList} = useCustomMove() //useCustomMove 활용 
+    const [result, setResult] = useState(null)
 
+    const {moveToList} =useCustomMove()
 
     const handleChangeTodo = (e) => {
         // todo[title]
@@ -24,8 +26,22 @@ const AddComponent = ()=> {
     }
 
     const handleClickAdd = () => {
-        console.log(todo)
+       // console.log(todo)
+       postAdd(todo).then(result => {
+        // {TNO:307}
+            setResult(result.TNO) //TNO값을 result로 상태관리
+            setTodo({...initState}) //화면 초기화
+            console.log(todo)
+       }).catch(e => {
+        console.error(e)
+     })
     }
+
+    const closeModal = () => {
+        setResult(null)
+        moveToList()
+    }
+
 
     return (<div className="border-2 border-sky-200 mt-10 m-2 p-4">
 
@@ -78,6 +94,16 @@ const AddComponent = ()=> {
                 </button>
             </div>
         </div>
+    
+        { result ? 
+        <ResultModal
+            title = {'Add Result'}
+            content={ `New ${result} Added`}
+            callbackFn={closeModal}
+        />
+        :
+        <></> }
+
     </div>
     );
 }
